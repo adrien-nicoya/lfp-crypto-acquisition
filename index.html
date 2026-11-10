@@ -12,11 +12,12 @@
 :root{
   /* Charte Cryptos Exponentielles (decouvrir.cryptos-exponentielles.com) */
   --paper:#f7f8fa; --surface:#ffffff; --ink:#011c40; --muted:#5b6b82; --line:#e3e8ef;
-  --accent:#056cf2; --accent-ink:#ffffff; --bar:#056cf2;
+  --accent:#056cf2; --accent-ink:#ffffff; --bar:#056cf2; --accent-light:#eaf2fe;
   --warn-bg:#fff4d6; --warn-ink:#6b4a00;
   color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:Kollektif,Outfit,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
 .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 64px}
 header{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;padding-bottom:20px;border-bottom:1px solid var(--line)}
@@ -39,7 +40,27 @@ button:disabled .spin{display:inline-block}
 section{margin-top:40px}
 h2{font-size:19px;font-weight:700;margin:0 0 16px;letter-spacing:-.005em}
 .sub{color:var(--muted);font-weight:500;font-size:14px;margin-left:8px}
-.kpis{box-shadow:0 1px 2px rgba(1,28,64,.06);display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+
+/* Inscrits */
+.total{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.total .n{font-size:68px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.total .l{color:var(--muted);font-size:16px}
+.mix{display:flex;height:18px;border-radius:5px;overflow:hidden;margin:22px 0 26px;background:var(--line)}
+.mix span{display:block;height:100%}
+.mix span+span{box-shadow:inset 2px 0 0 var(--paper)}
+.channels{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));border-top:1px solid var(--line)}
+.ch{padding:16px 18px 6px 0}
+.ch+.ch{padding-left:18px;border-left:1px solid var(--line)}
+.ch-head{display:flex;align-items:center;gap:8px;font-weight:600}
+.dot{width:10px;height:10px;border-radius:3px;flex:none}
+.ch-n{font-size:28px;font-weight:800;margin:6px 0 2px;letter-spacing:-.01em}
+.ch-p{color:var(--muted);font-size:13px}
+.goal{height:6px;border-radius:3px;background:var(--line);margin:8px 0 4px;overflow:hidden}
+.goal span{display:block;height:100%;border-radius:3px}
+@media (max-width:640px){.ch+.ch{padding-left:0;border-left:0;border-top:1px solid var(--line)}.total .n{font-size:52px}.wrap{padding:20px 16px 48px}}
+
+/* Meta */
+.kpis{display:grid;grid-template-columns:1fr 1fr 1.2fr;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(1,28,64,.06)}
 .kpi{padding:18px 22px}
 .kpi+.kpi{border-left:1px solid var(--line)}
 .kpi .k{color:var(--muted);font-size:14px}
@@ -47,16 +68,35 @@ h2{font-size:19px;font-weight:700;margin:0 0 16px;letter-spacing:-.005em}
 .kpi .d{color:var(--muted);font-size:13px;margin-top:2px}
 .kpi.real{background:var(--ink);color:#fff}
 .kpi.real .k,.kpi.real .d{color:#a9bdd8}
-@media (max-width:640px){.kpis{grid-template-columns:1fr}.kpi+.kpi{border-left:0;border-top:1px solid var(--line)}.wrap{padding:20px 16px 48px}}
+@media (max-width:760px){.kpis{grid-template-columns:1fr}.kpi+.kpi{border-left:0;border-top:1px solid var(--line)}}
+.note{color:var(--muted);font-size:13px;margin:8px 2px 0}
 .chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:16px}
 .chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
 .chart h3{margin:0;font-size:15px;font-weight:600}
-.legend{display:flex;gap:16px;color:var(--muted);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;color:var(--muted);font-size:13px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{display:inline-block}
 .sw.bar{width:12px;height:12px;border-radius:3px;background:var(--bar)}
 .sw.line{width:16px;height:3px;border-radius:2px;background:var(--ink)}
-.chart .box{position:relative;height:340px}
+.sw.dash{width:16px;height:0;border-top:2px dashed var(--muted)}
+.chart .box{position:relative;height:320px}
+
+/* A/B test */
+.table{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th,td{padding:11px 14px;text-align:right;white-space:nowrap}
+th{font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);font-size:13px}
+td{border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+th:first-child,td:first-child{text-align:left}
+td small{display:block;color:var(--muted);font-size:12px;font-weight:400}
+tr.lead td:first-child{font-weight:700;color:var(--accent)}
+.empty{color:var(--muted);padding:18px}
+.ab-title{font-size:15px;font-weight:600;margin:0 0 4px}
+.ab-period{color:var(--muted);font-size:13px;margin:0 0 10px}
+.ab-verdict{margin:0 0 14px;font-size:15px}
+.ab-verdict .muted{color:var(--muted);font-size:13px;display:block;margin-top:2px}
+.ab-pages{margin-top:24px}
 </style>
 </head>
 <body>
@@ -74,79 +114,181 @@ h2{font-size:19px;font-weight:700;margin:0 0 16px;letter-spacing:-.005em}
   </header>
   <div class="notice" id="notice"></div>
 
+  <section aria-labelledby="h-ins">
+    <h2 id="h-ins">Inscrits<span class="sub">source Google Sheet</span></h2>
+    <div class="total"><span class="n" id="total">–</span><span class="l" id="total-goal"></span></div>
+    <div class="mix" id="mix"></div>
+    <div class="channels" id="channels"></div>
+    <div class="chart" id="signups-chart" hidden>
+      <div class="chart-head"><h3>Inscrits par jour</h3>
+        <div class="legend"><span><i class="sw bar"></i>Inscrits du jour</span><span><i class="sw line"></i>Cumul</span><span id="goal-legend" hidden><i class="sw dash"></i><span id="goal-label">Objectif</span></span></div></div>
+      <div class="box"><canvas id="c-signups" aria-label="Inscrits par jour et cumul"></canvas></div>
+    </div>
+  </section>
+
   <section aria-labelledby="h-meta">
     <h2 id="h-meta">Publicités Meta<span class="sub" id="meta-sub"></span></h2>
     <div class="kpis">
       <div class="kpi"><div class="k">Dépensé</div><div class="v" id="k-spend">–</div><div class="d" id="k-spend-d"></div></div>
-      <div class="kpi real"><div class="k">CPL Meta</div><div class="v" id="k-cplm">–</div><div class="d" id="k-cplm-d"></div></div>
+      <div class="kpi"><div class="k">CPL Meta</div><div class="v" id="k-cplm">–</div><div class="d" id="k-cplm-d"></div></div>
+      <div class="kpi real"><div class="k">CPL réel</div><div class="v" id="k-cplr">–</div><div class="d" id="k-cplr-d"></div></div>
     </div>
+    <p class="note">CPL réel = dépense Meta ÷ inscrits « Meta » du Google Sheet. Il est souvent plus élevé que le CPL Meta, qui s'attribue aussi des inscrits venus d'autres canaux.</p>
     <div class="chart">
-      <div class="chart-head"><h3>Dépense et CPL Meta par jour</h3>
-        <div class="legend"><span><i class="sw bar"></i>Dépense</span><span><i class="sw line"></i>CPL Meta</span></div></div>
-      <div class="box"><canvas id="c-meta" aria-label="Dépense et CPL Meta par jour"></canvas></div>
+      <div class="chart-head"><h3 id="chart-title">Dépense et CPL réel par jour</h3>
+        <div class="legend"><span><i class="sw bar"></i>Dépense</span><span><i class="sw line"></i><span id="line-label">CPL réel</span></span></div></div>
+      <div class="box"><canvas id="c-meta" aria-label="Dépense et CPL par jour"></canvas></div>
     </div>
+  </section>
+
+  <section aria-labelledby="h-ab" id="ab-section" hidden>
+    <h2 id="h-ab">A/B test page d'inscription<span class="sub">source PostHog</span></h2>
+    <div id="ab"></div>
   </section>
 </div>
 
 <script>
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const FONT={family:'Kollektif, Outfit, system-ui, sans-serif'};
 const nf=new Intl.NumberFormat('fr-FR');
 const eur=(n,d=2)=>n==null?'–':n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=n=>n==null?'–':(n*100).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';
 const int=n=>n==null?'–':nf.format(n);
 const dshort=s=>new Date(s+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
 const dlong=s=>new Date(s+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let chart, last;
+const set=(id,v)=>document.getElementById(id).textContent=v;
+const charts={};
 
 function render(d){
-  last=d;
   const c=d.challenge||{};
-  document.getElementById('title').textContent=c.name||'LFP Crypto';
+  set('title',c.name||'LFP Crypto');
   document.title=(c.name||'LFP Crypto')+' — Acquisition';
-  document.getElementById('period').textContent=c.startDate?(c.endDate?`Acquisition du ${dlong(c.startDate)} au ${dlong(c.endDate)}`:`Acquisition depuis le ${dlong(c.startDate)}`):'';
-  document.getElementById('stamp').textContent='Mis à jour à '+new Date(d.generatedAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  set('period',c.startDate?(c.endDate?`Acquisition du ${dlong(c.startDate)} au ${dlong(c.endDate)}`:`Acquisition depuis le ${dlong(c.startDate)}`):'');
+  set('stamp','Mis à jour à '+new Date(d.generatedAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
   const notes=[];
   if(d.notStarted) notes.push(`L'acquisition démarre le ${dlong(c.startDate)} : le dashboard se remplira à partir de cette date.`);
   (d.errors||[]).forEach(e=>notes.push('Erreur : '+e));
   (d.warnings||[]).forEach(w=>notes.push(w));
   document.getElementById('notice').innerHTML=notes.map(esc).join('<br>');
+  renderSignups(d.signups,d.today);
   renderMeta(d.meta,d.today);
+  renderAb(d.abtest);
 }
 
+/* ---------- Inscrits ---------- */
+function renderSignups(s,today){
+  const goalEl=document.getElementById('total-goal');
+  if(!s){set('total','–');goalEl.textContent='';document.getElementById('mix').innerHTML='';document.getElementById('channels').innerHTML='';drawSignups(null);return}
+  set('total',int(s.total));
+  const chans=s.channels;
+  const goal=chans.some(c=>c.target)?chans.reduce((a,c)=>a+(c.target||0),0):null;
+  goalEl.textContent=goal?`${pct(s.total/goal)} de l'objectif (${int(goal)})`:'';
+  const sum=s.total||1;
+  document.getElementById('mix').innerHTML=chans.filter(c=>c.total).map(c=>`<span title="${esc(c.label)} : ${int(c.total)}" style="width:${c.total/sum*100}%;background:${c.color}"></span>`).join('');
+  document.getElementById('channels').innerHTML=chans.map(c=>`
+    <div class="ch">
+      <div class="ch-head"><span class="dot" style="background:${c.color}"></span>${esc(c.label)}</div>
+      <div class="ch-n">${int(c.total)}</div>
+      ${c.target?`<div class="goal"><span style="width:${Math.min(c.total/c.target,1)*100}%;background:${c.color}"></span></div><div class="ch-p">${pct(c.total/c.target)} de l'objectif (${int(c.target)})</div>`
+        :`<div class="ch-p">${s.total?pct(c.total/s.total)+' des inscrits':'Aucun inscrit pour l’instant'}</div>`}
+    </div>`).join('');
+  drawSignups(s.daily.map(x=>({...x,today:x.date===today})),goal,chans);
+}
+
+function drawSignups(rows,goal,chans){
+  const box=document.getElementById('signups-chart');
+  if(!window.Chart||!rows||!rows.length){box.hidden=true;return}
+  box.hidden=false;
+  const grid=css('--line'), tick=css('--muted'), blue=css('--bar'), ink=css('--ink');
+  document.getElementById('goal-legend').hidden=!goal;
+  if(goal) set('goal-label',`Objectif (${int(goal)})`);
+  charts.signups&&charts.signups.destroy();
+  charts.signups=new Chart(document.getElementById('c-signups'),{
+    data:{labels:rows.map(x=>dshort(x.date)+(x.today?' (en cours)':'')),datasets:[
+      {type:'bar',label:'Inscrits du jour',data:rows.map(x=>x.total),backgroundColor:rows.map(x=>x.today?blue+'55':blue),borderRadius:3,maxBarThickness:38,yAxisID:'y',order:3},
+      {type:'line',label:'Cumul',data:rows.map(x=>x.cumul),borderColor:ink,backgroundColor:'#fff',pointBorderColor:ink,pointRadius:3,borderWidth:2,tension:.25,yAxisID:'y1',order:1},
+      ...(goal?[{type:'line',label:'Objectif',data:rows.map(()=>goal),borderColor:tick,borderDash:[6,4],borderWidth:1.5,pointRadius:0,yAxisID:'y1',order:2}]:[])]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{filter:i=>i.dataset.label!=='Objectif',callbacks:{label:c=>`${c.dataset.label} : ${int(c.parsed.y)}`,
+        afterBody:i=>{const x=rows[i[0].dataIndex];return chans.filter(c=>x.sources[c.key]).map(c=>`${c.label} : ${int(x.sources[c.key])}`)}}}},
+      scales:{x:{grid:{display:false},ticks:{color:tick,font:FONT}},
+        y:{position:'left',beginAtZero:true,grid:{color:grid},ticks:{color:tick,font:FONT,precision:0,callback:v=>int(v)},title:{display:true,text:'Par jour',color:tick,font:FONT}},
+        y1:{position:'right',beginAtZero:true,suggestedMax:goal||undefined,grid:{drawOnChartArea:false},ticks:{color:tick,font:FONT,precision:0,callback:v=>int(v)},title:{display:true,text:'Cumul',color:tick,font:FONT}}}}});
+}
+
+/* ---------- Meta ---------- */
 function renderMeta(m,today){
-  const set=(id,v)=>document.getElementById(id).textContent=v;
-  if(!m){['k-spend','k-cplm'].forEach(i=>set(i,'–'));['k-spend-d','k-cplm-d','meta-sub'].forEach(i=>set(i,''));drawChart([],today);return}
-  set('k-spend',eur(m.spend,0)); set('k-spend-d',m.daily.length?`${m.daily.length} jours de diffusion`:'');
+  if(!m){['k-spend','k-cplm','k-cplr'].forEach(i=>set(i,'–'));['k-spend-d','k-cplm-d','k-cplr-d','meta-sub'].forEach(i=>set(i,''));drawMeta([],today);return}
+  set('k-spend',eur(m.spend,0)); set('k-spend-d',m.daily.length?`${m.daily.length} jour${m.daily.length>1?'s':''} de diffusion`:'');
   set('k-cplm',eur(m.cplMeta)); set('k-cplm-d',`${int(m.leads)} leads déclarés par Meta`);
+  set('k-cplr',eur(m.cplReel??null));
+  const gap=m.cplReel&&m.cplMeta?m.cplReel/m.cplMeta-1:null;
+  set('k-cplr-d',m.signupsSheet==null?'Inscrits du Sheet indisponibles':`${int(m.signupsSheet)} inscrits Meta dans le Sheet`+(gap!=null?` · ${gap>=0?'+':''}${pct(gap)} vs CPL Meta`:''));
   const act=(m.accounts||[]).filter(a=>!a.inactive&&!a.failed).length;
   set('meta-sub',m.accounts?.length>1?`${act} comptes actifs sur ${m.accounts.length}`:'');
-  drawChart(m.daily,today);
+  drawMeta(m.daily,today);
 }
 
-function drawChart(daily,today){
+function drawMeta(daily,today){
   if(!window.Chart) return;
-  const grid=css('--line'), tick=css('--muted'), blue=css('--bar'), ink=css('--ink'), font={family:'Kollektif, Outfit, system-ui, sans-serif'};
-  chart&&chart.destroy();
-  chart=new Chart(document.getElementById('c-meta'),{
+  const grid=css('--line'), tick=css('--muted'), blue=css('--bar'), ink=css('--ink');
+  const real=daily.some(x=>x.cplReel!=null), lbl=real?'CPL réel':'CPL Meta';
+  set('line-label',lbl); set('chart-title',`Dépense et ${lbl} par jour`);
+  charts.meta&&charts.meta.destroy();
+  charts.meta=new Chart(document.getElementById('c-meta'),{
     data:{labels:daily.map(x=>dshort(x.date)+(x.date===today?' (en cours)':'')),datasets:[
       {type:'bar',label:'Dépense',data:daily.map(x=>x.spend),backgroundColor:daily.map(x=>x.date===today?blue+'55':blue),borderRadius:3,maxBarThickness:38,yAxisID:'y',order:2},
-      {type:'line',label:'CPL Meta',data:daily.map(x=>x.cpl),borderColor:ink,backgroundColor:'#fff',pointBorderColor:ink,pointRadius:3,borderWidth:2,tension:.25,spanGaps:true,yAxisID:'y1',order:1}]},
+      {type:'line',label:lbl,data:daily.map(x=>real?x.cplReel:x.cpl),borderColor:ink,backgroundColor:'#fff',pointBorderColor:ink,pointRadius:3,borderWidth:2,tension:.25,spanGaps:true,yAxisID:'y1',order:1}]},
     options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label} : ${eur(c.parsed.y,c.dataset.yAxisID==='y'?0:2)}`,
-        afterBody:items=>`Leads Meta : ${int(daily[items[0].dataIndex].leads)}`}}},
-      scales:{x:{grid:{display:false},ticks:{color:tick,font}},
-        y:{position:'left',beginAtZero:true,grid:{color:grid},ticks:{color:tick,font,callback:v=>eur(v,0)},title:{display:true,text:'Dépense',color:tick,font}},
-        y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},ticks:{color:tick,font,callback:v=>eur(v)},title:{display:true,text:'CPL',color:tick,font}}}}});
+        afterBody:items=>{const x=daily[items[0].dataIndex];return [`Leads Meta : ${int(x.leads)} · CPL Meta : ${eur(x.cpl)}`,...(x.signupsSheet!=null?[`Inscrits Meta (Sheet) : ${int(x.signupsSheet)}`]:[])]}}}},
+      scales:{x:{grid:{display:false},ticks:{color:tick,font:FONT}},
+        y:{position:'left',beginAtZero:true,grid:{color:grid},ticks:{color:tick,font:FONT,callback:v=>eur(v,0)},title:{display:true,text:'Dépense',color:tick,font:FONT}},
+        y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},ticks:{color:tick,font:FONT,callback:v=>eur(v)},title:{display:true,text:'CPL',color:tick,font:FONT}}}}});
+}
+
+/* ---------- A/B test ---------- */
+function renderAb(ab){
+  const sec=document.getElementById('ab-section'), el=document.getElementById('ab');
+  if(ab===undefined){sec.hidden=true;return}
+  sec.hidden=false;
+  if(!ab){el.innerHTML='<div class="table"><div class="empty">Données PostHog indisponibles.</div></div>';return}
+  const when=new Date(ab.since).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const t=ab.test, cmp=Object.fromEntries(((t&&t.comparisons)||[]).map(c=>[c.variant,c]));
+  const multi=((t&&t.comparisons)||[]).length>1, seuil=t?String(+(t.alpha||.05).toFixed(4)).replace('.',','):'0,05';
+  let verdict='';
+  if(t){
+    const up=t.leader!==t.ref&&t.uplift!=null?` (${t.uplift>=0?'+':''}${pct(t.uplift)} vs ${esc(t.ref)})`:'';
+    const what=t.leader===t.ref?`La version ${esc(t.ref)} (référence) convertit mieux que ${multi?'toutes les autres':'l’autre version'}`:`La version ${esc(t.leader)} convertit mieux${up}`;
+    verdict=t.significant
+      ?`<strong>${what}</strong>, écart statistiquement fiable.<span class="muted">Seuil de fiabilité : p &lt; ${seuil}.</span>`
+      :`<strong>Pas encore de gagnant</strong> : ${esc(t.leader)} est devant${up} mais l'écart peut encore être dû au hasard.<span class="muted">Il faut descendre sous p = ${seuil} pour conclure.</span>`;
+  }
+  const hasData=ab.variants.some(x=>x.visits);
+  const testHtml=`<h3 class="ab-title">Test en cours : ${esc(ab.label)}${ab.audience?` <span class="sub">${esc(ab.audience)}</span>`:''}</h3>
+    <p class="ab-period">Depuis le ${when}</p>
+    ${hasData?`<div class="ab-verdict">${verdict}</div>
+    <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th><th>Écart vs ${esc(ab.variants[0].variant)}</th></tr></thead><tbody>
+    ${ab.variants.map((x,i)=>{const c=cmp[x.variant];return `<tr class="${t&&t.significant&&t.leader===x.variant?'lead':''}"><td>Version ${esc(x.variant)}</td><td>${int(x.visits)}</td><td>${int(x.signups)}</td><td>${pct(x.rate)}</td>
+      <td>${i===0?'Référence':c&&c.uplift!=null?`${c.uplift>=0?'+':''}${pct(c.uplift)}${c.significant?' · fiable':''}`:'–'}</td></tr>`}).join('')}
+    </tbody></table></div>`:'<div class="table"><div class="empty">Pas encore de visites sur la période.</div></div>'}`;
+  const pages=(ab.pages||[]);
+  const pagesHtml=pages.length?`<div class="ab-pages"><h3 class="ab-title">Pages dédiées</h3><p class="ab-period">Hors test, suivies pour leur taux de conversion</p>
+    <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
+    ${pages.map(p=>`<tr><td>Version ${esc(p.variant)}${p.audience?`<small>${esc(p.audience)}</small>`:''}</td><td>${int(p.visits)}</td><td>${int(p.signups)}</td><td>${pct(p.rate)}</td></tr>`).join('')}
+    </tbody></table></div></div>`:'';
+  el.innerHTML=testHtml+pagesHtml;
 }
 
 async function load(){
   const btn=document.getElementById('btn'); btn.disabled=true;
-  document.getElementById('stamp').textContent='Mise à jour…';
+  set('stamp','Mise à jour…');
   try{
     const r=await fetch('/api/report',{cache:'no-store'});
     if(!(r.headers.get('content-type')||'').includes('application/json')) throw new Error('no-api');
     render(await r.json());
-  }catch(e){ document.getElementById('stamp').textContent='Données indisponibles'; document.getElementById('notice').textContent='Impossible de joindre l\'API du dashboard.'; }
+  }catch(e){ set('stamp','Données indisponibles'); document.getElementById('notice').textContent='Impossible de joindre l’API du dashboard.'; }
   finally{ btn.disabled=false; }
 }
 document.getElementById('btn').addEventListener('click',load);
