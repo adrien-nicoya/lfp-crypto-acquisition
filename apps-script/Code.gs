@@ -23,9 +23,9 @@ function doGet(e) {
   rows.forEach(r => {
     const email = iEmail >= 0 ? String(r[iEmail]).trim().toLowerCase() : '';
     if (!email && !r[iSource] && !r[iDate]) return; // ligne vide
-    if (email) { if (seen[email]) { duplicates++; return; } seen[email] = true; }
     const day = toDay(r[iDate]);
-    if (!day) { noDate++; return; }
+    if (!day) { noDate++; return; } // avant le dédoublonnage : une ligne sans date ne « réserve » pas l'email
+    if (email) { if (seen[email]) { duplicates++; return; } seen[email] = true; }
     const src = String(r[iSource] || '').trim() || 'Sans source';
     byDay[day] = byDay[day] || {};
     byDay[day][src] = (byDay[day][src] || 0) + 1;
