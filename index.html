@@ -97,6 +97,7 @@ tr.lead td:first-child{font-weight:700;color:var(--accent)}
 .ab-verdict{margin:0 0 14px;font-size:15px}
 .ab-verdict .muted{color:var(--muted);font-size:13px;display:block;margin-top:2px}
 .ab-pages{margin-top:24px}
+.ab-hist{margin-top:14px;opacity:.85}
 </style>
 </head>
 <body>
@@ -254,31 +255,36 @@ function renderAb(ab){
   if(ab===undefined){sec.hidden=true;return}
   sec.hidden=false;
   if(!ab){el.innerHTML='<div class="table"><div class="empty">Données PostHog indisponibles.</div></div>';return}
-  const when=new Date(ab.since).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  const t=ab.test, cmp=Object.fromEntries(((t&&t.comparisons)||[]).map(c=>[c.variant,c]));
-  const multi=((t&&t.comparisons)||[]).length>1, seuil=t?String(+(t.alpha||.05).toFixed(4)).replace('.',','):'0,05';
-  let verdict='';
-  if(t){
-    const up=t.leader!==t.ref&&t.uplift!=null?` (${t.uplift>=0?'+':''}${pct(t.uplift)} vs ${esc(t.ref)})`:'';
-    const what=t.leader===t.ref?`La version ${esc(t.ref)} (référence) convertit mieux que ${multi?'toutes les autres':'l’autre version'}`:`La version ${esc(t.leader)} convertit mieux${up}`;
-    verdict=t.significant
-      ?`<strong>${what}</strong>, écart statistiquement fiable.<span class="muted">Seuil de fiabilité : p &lt; ${seuil}.</span>`
-      :`<strong>Pas encore de gagnant</strong> : ${esc(t.leader)} est devant${up} mais l'écart peut encore être dû au hasard.<span class="muted">Il faut descendre sous p = ${seuil} pour conclure.</span>`;
-  }
-  const hasData=ab.variants.some(x=>x.visits);
-  const testHtml=`<h3 class="ab-title">Test en cours : ${esc(ab.label)}${ab.audience?` <span class="sub">${esc(ab.audience)}</span>`:''}</h3>
-    <p class="ab-period">Depuis le ${when}</p>
+  const fmt=d=>new Date(d).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const block=(x,title,period)=>{
+    const t=x.test, cmp=Object.fromEntries(((t&&t.comparisons)||[]).map(c=>[c.variant,c]));
+    const multi=((t&&t.comparisons)||[]).length>1, seuil=t?String(+(t.alpha||.05).toFixed(4)).replace('.',','):'0,05';
+    let verdict='';
+    if(t){
+      const up=t.leader!==t.ref&&t.uplift!=null?` (${t.uplift>=0?'+':''}${pct(t.uplift)} vs ${esc(t.ref)})`:'';
+      const what=t.leader===t.ref?`La version ${esc(t.ref)} (référence) convertit mieux que ${multi?'toutes les autres':'l’autre version'}`:`La version ${esc(t.leader)} convertit mieux${up}`;
+      verdict=t.significant
+        ?`<strong>${what}</strong>, écart statistiquement fiable.<span class="muted">Seuil de fiabilité : p &lt; ${seuil}.</span>`
+        :`<strong>${x.until?'Pas de gagnant net':'Pas encore de gagnant'}</strong> : ${esc(t.leader)} ${x.until?'était':'est'} devant${up} mais l'écart peut ${x.until?'':'encore '}être dû au hasard.<span class="muted">Il ${x.until?'fallait':'faut'} descendre sous p = ${seuil} pour conclure.</span>`;
+    }
+    const hasData=x.variants.some(v=>v.visits);
+    return `<h3 class="ab-title">${title} : ${esc(x.label)}${x.audience?` <span class="sub">${esc(x.audience)}</span>`:''}</h3>
+    <p class="ab-period">${period}</p>
     ${hasData?`<div class="ab-verdict">${verdict}</div>
-    <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th><th>Écart vs ${esc(ab.variants[0].variant)}</th></tr></thead><tbody>
-    ${ab.variants.map((x,i)=>{const c=cmp[x.variant];return `<tr class="${t&&t.significant&&t.leader===x.variant?'lead':''}"><td>Version ${esc(x.variant)}</td><td>${int(x.visits)}</td><td>${int(x.signups)}</td><td>${pct(x.rate)}</td>
+    <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th><th>Écart vs ${esc(x.variants[0].variant)}</th></tr></thead><tbody>
+    ${x.variants.map((v,i)=>{const c=cmp[v.variant];return `<tr class="${t&&t.significant&&t.leader===v.variant?'lead':''}"><td>Version ${esc(v.variant)}</td><td>${int(v.visits)}</td><td>${int(v.signups)}</td><td>${pct(v.rate)}</td>
       <td>${i===0?'Référence':c&&c.uplift!=null?`${c.uplift>=0?'+':''}${pct(c.uplift)}${c.significant?' · fiable':''}`:'–'}</td></tr>`}).join('')}
     </tbody></table></div>`:'<div class="table"><div class="empty">Pas encore de visites sur la période.</div></div>'}`;
+  };
+  const testHtml=block(ab,'Test en cours',`Depuis le ${fmt(ab.since)}`);
+  const hist=(ab.history||[]);
+  const histHtml=hist.length?`<div class="ab-pages"><h3 class="ab-title" style="font-size:16px">Tests terminés</h3>${hist.map(h=>`<div class="ab-hist">${block(h,'Test',`Du ${fmt(h.since)} au ${fmt(h.until)}`)}</div>`).join('')}</div>`:'';
   const pages=(ab.pages||[]);
   const pagesHtml=pages.length?`<div class="ab-pages"><h3 class="ab-title">Pages dédiées</h3><p class="ab-period">Hors test, suivies pour leur taux de conversion</p>
     <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
     ${pages.map(p=>`<tr><td>Version ${esc(p.label||p.variant)}${p.audience?`<small>${esc(p.audience)}</small>`:''}</td><td>${int(p.visits)}</td><td>${int(p.signups)}</td><td>${pct(p.rate)}</td></tr>`).join('')}
     </tbody></table></div></div>`:'';
-  el.innerHTML=testHtml+pagesHtml;
+  el.innerHTML=testHtml+pagesHtml+histHtml;
 }
 
 async function load(){
