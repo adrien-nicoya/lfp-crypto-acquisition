@@ -96,6 +96,14 @@ tr.lead td:first-child{font-weight:700;color:var(--accent)}
 .ab-period{color:var(--muted);font-size:13px;margin:0 0 10px}
 .ab-verdict{margin:0 0 14px;font-size:15px}
 .ab-verdict .muted{color:var(--muted);font-size:13px;display:block;margin-top:2px}
+.ab-tabs{display:inline-flex;flex-wrap:wrap;gap:4px;padding:5px;margin:0 0 14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.ab-tab{display:inline-flex;align-items:center;gap:10px;border:0;cursor:pointer;background:transparent;color:var(--muted);font:600 15px/1.2 inherit;font-family:inherit;padding:11px 18px;border-radius:10px}
+.ab-tab.on{background:var(--ink);color:#fff}
+.ab-tab .live{width:9px;height:9px;border-radius:50%;background:#22c55e;flex:none}
+.ab-table a{color:var(--ink);font-weight:600}
+.ab-table tr.best td{background:#fbf6e6}
+.ab-table .badge{display:inline-block;margin-left:8px;padding:3px 10px;border-radius:999px;background:linear-gradient(180deg,#f0cf5a,#dcae2e);color:var(--ink);font-size:12px;font-weight:700;vertical-align:middle}
+.ab-table tr.ab-total td{background:var(--accent-light);font-weight:700}
 .ab-pages{margin-top:24px}
 .ab-hist{margin-top:14px;opacity:.85}
 </style>
@@ -143,7 +151,7 @@ tr.lead td:first-child{font-weight:700;color:var(--accent)}
   </section>
 
   <section aria-labelledby="h-ab" id="ab-section" hidden>
-    <h2 id="h-ab">A/B test page d'inscription<span class="sub">source PostHog</span></h2>
+    <h2 id="h-ab">Test des pages d'inscription<span class="sub">source PostHog<span id="h-ab-host"></span></span></h2>
     <div id="ab"></div>
   </section>
 </div>
@@ -255,36 +263,35 @@ function renderAb(ab){
   if(ab===undefined){sec.hidden=true;return}
   sec.hidden=false;
   if(!ab){el.innerHTML='<div class="table"><div class="empty">Données PostHog indisponibles.</div></div>';return}
+  if(ab.host) document.getElementById('h-ab-host').textContent=' · '+ab.host;
   const fmt=d=>new Date(d).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  const block=(x,title,period)=>{
-    const t=x.test, cmp=Object.fromEntries(((t&&t.comparisons)||[]).map(c=>[c.variant,c]));
-    const multi=((t&&t.comparisons)||[]).length>1, seuil=t?String(+(t.alpha||.05).toFixed(4)).replace('.',','):'0,05';
-    let verdict='';
-    if(t){
-      const up=t.leader!==t.ref&&t.uplift!=null?` (${t.uplift>=0?'+':''}${pct(t.uplift)} vs ${esc(t.ref)})`:'';
-      const what=t.leader===t.ref?`La version ${esc(t.ref)} (référence) convertit mieux que ${multi?'toutes les autres':'l’autre version'}`:`La version ${esc(t.leader)} convertit mieux${up}`;
-      verdict=t.significant
-        ?`<strong>${what}</strong>, écart statistiquement fiable.<span class="muted">Seuil de fiabilité : p &lt; ${seuil}.</span>`
-        :`<strong>${x.until?'Pas de gagnant net':'Pas encore de gagnant'}</strong> : ${esc(t.leader)} ${x.until?'était':'est'} devant${up} mais l'écart peut ${x.until?'':'encore '}être dû au hasard.<span class="muted">Il ${x.until?'fallait':'faut'} descendre sous p = ${seuil} pour conclure.</span>`;
-    }
-    const hasData=x.variants.some(v=>v.visits);
-    return `<h3 class="ab-title">${title} : ${esc(x.label)}${x.audience?` <span class="sub">${esc(x.audience)}</span>`:''}</h3>
-    <p class="ab-period">${period}</p>
-    ${hasData?`<div class="ab-verdict">${verdict}</div>
-    <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th><th>Écart vs ${esc(x.variants[0].variant)}</th></tr></thead><tbody>
-    ${x.variants.map((v,i)=>{const c=cmp[v.variant];return `<tr class="${t&&t.significant&&t.leader===v.variant?'lead':''}"><td>Version ${esc(v.variant)}</td><td>${int(v.visits)}</td><td>${int(v.signups)}</td><td>${pct(v.rate)}</td>
-      <td>${i===0?'Référence':c&&c.uplift!=null?`${c.uplift>=0?'+':''}${pct(c.uplift)}${c.significant?' · fiable':''}`:'–'}</td></tr>`}).join('')}
-    </tbody></table></div>`:'<div class="table"><div class="empty">Pas encore de visites sur la période.</div></div>'}`;
+  const hist=ab.history||[];
+  // Test en cours = numéro le plus haut ; historique du plus récent au plus ancien
+  const tests=[{...ab,running:true,n:hist.length+1},...hist.map((h,i)=>({...h,running:false,n:hist.length-i}))];
+  const url=v=>ab.host?`https://${ab.host}/${encodeURIComponent(String(v).toLowerCase())}`:null;
+  const table=x=>{
+    const tot=x.variants.reduce((a,v)=>({visits:a.visits+v.visits,signups:a.signups+v.signups}),{visits:0,signups:0});
+    if(!tot.visits) return '<div class="table"><div class="empty">Pas encore de visites sur la période.</div></div>';
+    const withRate=x.variants.filter(v=>v.visits);
+    const best=withRate.length>1?withRate.reduce((a,b)=>b.rate>a.rate?b:a):null;
+    return `<div class="table"><table class="ab-table"><thead><tr><th>Version</th><th>Visites</th><th>Part du trafic</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
+    ${x.variants.map(v=>{const u=url(v.variant),isBest=best&&best.variant===v.variant;return `<tr class="${isBest?'best':''}"><td>${u?`<a href="${esc(u)}" target="_blank" rel="noopener">Version ${esc(v.variant)}</a>`:`Version ${esc(v.variant)}`}${isBest?' <span class="badge">Meilleur taux</span>':''}</td>
+      <td>${int(v.visits)}</td><td>${pct(v.visits/tot.visits)}</td><td>${int(v.signups)}</td><td>${pct(v.rate)}</td></tr>`}).join('')}
+    <tr class="ab-total"><td>Total</td><td>${int(tot.visits)}</td><td></td><td>${int(tot.signups)}</td><td>${pct(tot.signups/tot.visits)}</td></tr>
+    </tbody></table></div>`;
   };
-  const testHtml=block(ab,'Test en cours',`Depuis le ${fmt(ab.since)}`);
-  const hist=(ab.history||[]);
-  const histHtml=hist.length?`<div class="ab-pages"><h3 class="ab-title" style="font-size:16px">Tests terminés</h3>${hist.map(h=>`<div class="ab-hist">${block(h,'Test',`Du ${fmt(h.since)} au ${fmt(h.until)}`)}</div>`).join('')}</div>`:'';
+  const panel=x=>`<p class="ab-period">${x.running?`Depuis le ${fmt(x.since)}`:`Du ${fmt(x.since)} au ${fmt(x.until)}`}${x.audience?` · ${esc(x.audience)}`:''} · chiffres bruts, sans version de référence</p>${table(x)}`;
+  const tabs=`<div class="ab-tabs" role="tablist">${tests.map((x,i)=>`<button type="button" role="tab" class="ab-tab${i===0?' on':''}" data-i="${i}" aria-selected="${i===0}">${x.running?'<span class="live"></span>':''}Test ${x.n} · ${esc(x.label)} · ${x.running?'en cours':'terminé'}</button>`).join('')}</div>`;
   const pages=(ab.pages||[]);
   const pagesHtml=pages.length?`<div class="ab-pages"><h3 class="ab-title">Pages dédiées</h3><p class="ab-period">Hors test, suivies pour leur taux de conversion</p>
     <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
     ${pages.map(p=>`<tr><td>Version ${esc(p.label||p.variant)}${p.audience?`<small>${esc(p.audience)}</small>`:''}</td><td>${int(p.visits)}</td><td>${int(p.signups)}</td><td>${pct(p.rate)}</td></tr>`).join('')}
     </tbody></table></div></div>`:'';
-  el.innerHTML=testHtml+pagesHtml+histHtml;
+  el.innerHTML=tabs+`<div id="ab-panel">${panel(tests[0])}</div>`+pagesHtml;
+  el.querySelectorAll('.ab-tab').forEach(b=>b.addEventListener('click',()=>{
+    el.querySelectorAll('.ab-tab').forEach(o=>{o.classList.toggle('on',o===b);o.setAttribute('aria-selected',o===b)});
+    document.getElementById('ab-panel').innerHTML=panel(tests[+b.dataset.i]);
+  }));
 }
 
 async function load(){
