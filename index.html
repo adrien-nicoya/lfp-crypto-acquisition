@@ -96,14 +96,15 @@ tr.lead td:first-child{font-weight:700;color:var(--accent)}
 .ab-period{color:var(--muted);font-size:13px;margin:0 0 10px}
 .ab-verdict{margin:0 0 14px;font-size:15px}
 .ab-verdict .muted{color:var(--muted);font-size:13px;display:block;margin-top:2px}
-.ab-tabs{display:inline-flex;flex-wrap:wrap;gap:4px;padding:5px;margin:0 0 14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.ab-tab{display:inline-flex;align-items:center;gap:10px;border:0;cursor:pointer;background:transparent;color:var(--muted);font:600 15px/1.2 inherit;font-family:inherit;padding:11px 18px;border-radius:10px}
-.ab-tab.on{background:var(--ink);color:#fff}
-.ab-tab .live{width:9px;height:9px;border-radius:50%;background:#22c55e;flex:none}
-.ab-table a{color:var(--ink);font-weight:600}
-.ab-table tr.best td{background:#fbf6e6}
-.ab-table .badge{display:inline-block;margin-left:8px;padding:3px 10px;border-radius:999px;background:linear-gradient(180deg,#f0cf5a,#dcae2e);color:var(--ink);font-size:12px;font-weight:700;vertical-align:middle}
-.ab-table tr.ab-total td{background:var(--accent-light);font-weight:700}
+.ab-tabs{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;margin:0 0 14px;border-radius:10px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+.ab-tabs button{border:0;cursor:pointer;background:transparent;color:var(--muted);font-family:inherit;font-weight:600;font-size:13px;padding:7px 12px;border-radius:7px}
+.ab-tabs button[aria-selected="true"]{background:var(--ink);color:#fff}
+.ab-tabs button .live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#16a34a;margin-right:6px;vertical-align:1px}
+#ab td a{color:var(--ink);font-weight:600}
+#ab tfoot td{font-weight:700;border-bottom:0;background:var(--accent-light)}
+#ab tr.best td{background:color-mix(in srgb,#f6dc70 22%,transparent)}
+#ab tr.best td:first-child{font-weight:700}
+.tag-best{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:linear-gradient(80deg,#d6aa00 0%,#e4c031 22%,#eccc4d 33%,#f6dc70 43%,#eccc4d 70%,#d6aa00 100%);color:#00173f;vertical-align:1px}
 .ab-pages{margin-top:24px}
 .ab-hist{margin-top:14px;opacity:.85}
 </style>
@@ -273,23 +274,23 @@ function renderAb(ab){
     const tot=x.variants.reduce((a,v)=>({visits:a.visits+v.visits,signups:a.signups+v.signups}),{visits:0,signups:0});
     if(!tot.visits) return '<div class="table"><div class="empty">Pas encore de visites sur la période.</div></div>';
     const withRate=x.variants.filter(v=>v.visits);
-    const best=withRate.length>1?withRate.reduce((a,b)=>b.rate>a.rate?b:a):null;
-    return `<div class="table"><table class="ab-table"><thead><tr><th>Version</th><th>Visites</th><th>Part du trafic</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
-    ${x.variants.map(v=>{const u=url(v.variant),isBest=best&&best.variant===v.variant;return `<tr class="${isBest?'best':''}"><td>${u?`<a href="${esc(u)}" target="_blank" rel="noopener">Version ${esc(v.variant)}</a>`:`Version ${esc(v.variant)}`}${isBest?' <span class="badge">Meilleur taux</span>':''}</td>
+    const top=withRate.length>1?withRate.reduce((a,b)=>b.rate>a.rate?b:a):null;
+    const best=top&&top.rate>0&&withRate.every(v=>v===top||v.rate<top.rate)?top:null;
+    return `<div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Part du trafic</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
+    ${x.variants.map(v=>{const u=url(v.variant),isBest=best&&best.variant===v.variant;return `<tr class="${isBest?'best':''}"><td>${u?`<a href="${esc(u)}" target="_blank" rel="noopener">Version ${esc(v.variant)}</a>`:`Version ${esc(v.variant)}`}${isBest?'<span class="tag-best">Meilleur taux</span>':''}</td>
       <td>${int(v.visits)}</td><td>${pct(v.visits/tot.visits)}</td><td>${int(v.signups)}</td><td>${pct(v.rate)}</td></tr>`}).join('')}
-    <tr class="ab-total"><td>Total</td><td>${int(tot.visits)}</td><td></td><td>${int(tot.signups)}</td><td>${pct(tot.signups/tot.visits)}</td></tr>
-    </tbody></table></div>`;
+    </tbody><tfoot><tr><td>Total</td><td>${int(tot.visits)}</td><td></td><td>${int(tot.signups)}</td><td>${pct(tot.signups/tot.visits)}</td></tr></tfoot></table></div>`;
   };
   const panel=x=>`<p class="ab-period">${x.running?`Depuis le ${fmt(x.since)}`:`Du ${fmt(x.since)} au ${fmt(x.until)}`}${x.audience?` · ${esc(x.audience)}`:''} · chiffres bruts, sans version de référence</p>${table(x)}`;
-  const tabs=`<div class="ab-tabs" role="tablist">${tests.map((x,i)=>`<button type="button" role="tab" class="ab-tab${i===0?' on':''}" data-i="${i}" aria-selected="${i===0}">${x.running?'<span class="live"></span>':''}Test ${x.n} · ${esc(x.label)} · ${x.running?'en cours':'terminé'}</button>`).join('')}</div>`;
+  const tabs=`<div class="ab-tabs" role="tablist">${tests.map((x,i)=>`<button type="button" role="tab" data-i="${i}" aria-selected="${i===0}">${x.running?'<span class="live"></span>':''}Test ${x.n} · ${esc(x.label)} · ${x.running?'en cours':'terminé'}</button>`).join('')}</div>`;
   const pages=(ab.pages||[]);
   const pagesHtml=pages.length?`<div class="ab-pages"><h3 class="ab-title">Pages dédiées</h3><p class="ab-period">Hors test, suivies pour leur taux de conversion</p>
     <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
     ${pages.map(p=>`<tr><td>Version ${esc(p.label||p.variant)}${p.audience?`<small>${esc(p.audience)}</small>`:''}</td><td>${int(p.visits)}</td><td>${int(p.signups)}</td><td>${pct(p.rate)}</td></tr>`).join('')}
     </tbody></table></div></div>`:'';
   el.innerHTML=tabs+`<div id="ab-panel">${panel(tests[0])}</div>`+pagesHtml;
-  el.querySelectorAll('.ab-tab').forEach(b=>b.addEventListener('click',()=>{
-    el.querySelectorAll('.ab-tab').forEach(o=>{o.classList.toggle('on',o===b);o.setAttribute('aria-selected',o===b)});
+  el.querySelectorAll('.ab-tabs button').forEach(b=>b.addEventListener('click',()=>{
+    el.querySelectorAll('.ab-tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));
     document.getElementById('ab-panel').innerHTML=panel(tests[+b.dataset.i]);
   }));
 }
