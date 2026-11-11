@@ -276,7 +276,7 @@ function renderAb(ab){
   const pages=(ab.pages||[]);
   const pagesHtml=pages.length?`<div class="ab-pages"><h3 class="ab-title">Pages dédiées</h3><p class="ab-period">Hors test, suivies pour leur taux de conversion</p>
     <div class="table"><table><thead><tr><th>Version</th><th>Visites</th><th>Inscriptions</th><th>Taux de conversion</th></tr></thead><tbody>
-    ${pages.map(p=>`<tr><td>Version ${esc(p.variant)}${p.audience?`<small>${esc(p.audience)}</small>`:''}</td><td>${int(p.visits)}</td><td>${int(p.signups)}</td><td>${pct(p.rate)}</td></tr>`).join('')}
+    ${pages.map(p=>`<tr><td>Version ${esc(p.label||p.variant)}${p.audience?`<small>${esc(p.audience)}</small>`:''}</td><td>${int(p.visits)}</td><td>${int(p.signups)}</td><td>${pct(p.rate)}</td></tr>`).join('')}
     </tbody></table></div></div>`:'';
   el.innerHTML=testHtml+pagesHtml;
 }
