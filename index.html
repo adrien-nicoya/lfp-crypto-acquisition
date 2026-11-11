@@ -57,6 +57,10 @@ h2{font-size:19px;font-weight:700;margin:0 0 16px;letter-spacing:-.005em}
 .ch-p{color:var(--muted);font-size:13px}
 .goal{height:6px;border-radius:3px;background:var(--line);margin:8px 0 4px;overflow:hidden}
 .goal span{display:block;height:100%;border-radius:3px}
+.ch-days{list-style:none;margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--line);font-size:13px}
+.ch-days li{display:flex;justify-content:space-between;gap:8px;padding:3px 0;white-space:nowrap}
+.ch-days li span:first-child{color:var(--muted)}
+.ch-days li strong{font-weight:600}
 @media (max-width:640px){.ch+.ch{padding-left:0;border-left:0;border-top:1px solid var(--line)}.total .n{font-size:52px}.wrap{padding:20px 16px 48px}}
 
 /* Meta */
@@ -187,6 +191,11 @@ function render(d){
 }
 
 /* ---------- Inscrits ---------- */
+function chDays(daily,key,today){
+  const rows=daily.filter(x=>x.sources[key]);
+  if(!rows.length) return '';
+  return `<ul class="ch-days">${rows.map(x=>`<li><span>${x.date===today?'Aujourd’hui':dlong(x.date)}</span><strong>${int(x.sources[key])} inscrit${x.sources[key]>1?'s':''}</strong></li>`).join('')}</ul>`;
+}
 function renderSignups(s,today){
   const goalEl=document.getElementById('total-goal');
   if(!s){set('total','–');goalEl.textContent='';document.getElementById('mix').innerHTML='';document.getElementById('channels').innerHTML='';drawSignups(null);return}
@@ -202,6 +211,7 @@ function renderSignups(s,today){
       <div class="ch-n">${int(c.total)}</div>
       ${c.target?`<div class="goal"><span style="width:${Math.min(c.total/c.target,1)*100}%;background:${c.color}"></span></div><div class="ch-p">${pct(c.total/c.target)} de l'objectif (${int(c.target)})</div>`
         :`<div class="ch-p">${s.total?pct(c.total/s.total)+' des inscrits':'Aucun inscrit pour l’instant'}</div>`}
+      ${c.byDay?chDays(s.daily,c.key,today):''}
     </div>`).join('');
   drawSignups(s.daily.map(x=>({...x,today:x.date===today})),goal,chans);
 }
