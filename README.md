@@ -2,7 +2,7 @@
 
 - Inscrits par source et par jour : Google Sheet « LFP Crypto - Challenge » (colonnes `source` et `date inscription`), via un script Apps Script qui ne renvoie que des comptages.
 - Meta : dépense, CPL Meta et CPL réel (dépense ÷ inscrits « Meta » du Sheet), par jour.
-- A/B test : PostHog (projet Optin LFP, sommet.saturnindevins.com), A1 vs B pour Meta (historique : A2 vs B, A3 vs B), pages C (Liste Saturnin), Capital et Ataraxia suivies à part.
+- A/B test : PostHog (projet Optin LFP, sommet.saturnindevins.com), A1 vs B vs E pour Meta (historique : A1 vs B, A2 vs B, A3 vs B), pages C (Liste Saturnin), Capital et Ataraxia suivies à part.
 
 ## Mise en route
 1. Sheet → Extensions → Apps Script : coller `apps-script/Code.gs`, remplacer `TOKEN`, puis Déployer → Nouveau déploiement → Application web (exécuter en tant que moi, accès : tout le monde). Copier l'URL `/exec`.
