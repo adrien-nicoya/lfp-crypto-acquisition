@@ -1,0 +1,5 @@
+# Données brutes (emails, téléphones) : ne jamais les committer
+*.csv
+*.txt
+*.zip
+clusters.json
