@@ -30,6 +30,9 @@ h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.01em}
 .stamp{color:var(--muted);font-size:13px;text-align:right}
 button{font:inherit;font-weight:600;font-size:14px;color:var(--accent-ink);background:var(--accent);border:0;border-radius:8px;padding:10px 16px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
 button:disabled{opacity:.6;cursor:progress}
+#btn.ghost{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.chip{display:inline-block;vertical-align:middle;margin-left:10px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:0;background:var(--line);color:var(--muted)}
+.chip.done{background:var(--ink);color:#fff}
 button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:none;animation:r .8s linear infinite}
 button:disabled .spin{display:inline-block}
@@ -118,7 +121,7 @@ tr.lead td:first-child{font-weight:700;color:var(--accent)}
   <header>
     <div>
       <p class="brand"><img src="https://decouvrir.cryptos-exponentielles.com/logo-cryptos-exponentielles.png" alt="Cryptos Exponentielles" onerror="this.outerHTML='<span class=logo-txt>Cryptos Exponentielles</span>'"><span>Dashboard acquisition</span></p>
-      <h1 id="title">LFP Crypto</h1>
+      <h1><span id="title">LFP Crypto</span><span class="chip" id="status" hidden></span></h1>
       <div class="period" id="period"></div>
     </div>
     <div class="refresh">
@@ -179,11 +182,18 @@ function render(d){
   set('title',c.name||'LFP Crypto');
   document.title=(c.name||'LFP Crypto')+' — Acquisition';
   set('period',c.startDate?(c.endDate?`Acquisition du ${dlong(c.startDate)} au ${dlong(c.endDate)}`:`Acquisition depuis le ${dlong(c.startDate)}`):'');
-  set('stamp','Mis à jour à '+new Date(d.generatedAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
+  const at=new Date(d.generatedAt), hm=at.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), day=at.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+  const live=c.status!=='done', st=document.getElementById('status');
+  st.hidden=live; st.textContent='Terminé'; st.className='chip done';
+  const btn=document.getElementById('btn');
+  btn.lastChild.textContent=live?'Mettre à jour':(d.frozen?'Figer à nouveau':'Figer les données');
+  btn.dataset.mode=live?'refresh':'freeze'; btn.classList.toggle('ghost',!live&&!!d.frozen);
+  set('stamp',live?'Mis à jour à '+hm:(d.frozen?`Données figées le ${day} à ${hm}`:`Calculé à ${hm} · pas encore figé`));
   const notes=[];
   if(d.notStarted) notes.push(`L'acquisition démarre le ${dlong(c.startDate)} : le dashboard se remplira à partir de cette date.`);
   (d.errors||[]).forEach(e=>notes.push('Erreur : '+e));
   (d.warnings||[]).forEach(w=>notes.push(w));
+  if(!live&&!d.frozen&&!(d.errors||[]).length) notes.push('Challenge terminé : clique sur « Figer les données » pour enregistrer les chiffres définitifs.');
   document.getElementById('notice').innerHTML=notes.map(esc).join('<br>');
   renderSignups(d.signups,d.today);
   renderMeta(d.meta,d.today);
@@ -278,7 +288,7 @@ function renderAb(ab){
   const fmt=d=>new Date(d).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const hist=ab.history||[];
   // Test en cours = numéro le plus haut ; historique du plus récent au plus ancien
-  const tests=[{...ab,running:true,n:hist.length+1},...hist.map((h,i)=>({...h,running:false,n:hist.length-i}))];
+  const tests=[{...ab,running:!ab.until,n:hist.length+1},...hist.map((h,i)=>({...h,running:false,n:hist.length-i}))];
   const url=v=>ab.host?`https://${ab.host}/${encodeURIComponent(String(v).toLowerCase())}`:null;
   const table=x=>{
     const tot=x.variants.reduce((a,v)=>({visits:a.visits+v.visits,signups:a.signups+v.signups}),{visits:0,signups:0});
@@ -305,18 +315,22 @@ function renderAb(ab){
   }));
 }
 
-async function load(){
+async function load(freeze){
   const btn=document.getElementById('btn'); btn.disabled=true;
-  set('stamp','Mise à jour…');
+  set('stamp',freeze?'Calcul et enregistrement…':'Mise à jour…');
   try{
-    const r=await fetch('/api/report',{cache:'no-store'});
+    const r=await fetch(freeze?'/api/freeze':'/api/report',{method:freeze?'POST':'GET',cache:'no-store'});
     if(!(r.headers.get('content-type')||'').includes('application/json')) throw new Error('no-api');
     render(await r.json());
   }catch(e){ set('stamp','Données indisponibles'); document.getElementById('notice').textContent='Impossible de joindre l’API du dashboard.'; }
   finally{ btn.disabled=false; }
 }
-document.getElementById('btn').addEventListener('click',load);
-load();
+document.getElementById('btn').addEventListener('click',e=>{
+  const freeze=e.currentTarget.dataset.mode==='freeze';
+  if(freeze&&!confirm('Recalculer le challenge et enregistrer les chiffres définitifs ?')) return;
+  load(freeze);
+});
+load(false);
 </script>
 </body>
 </html>
