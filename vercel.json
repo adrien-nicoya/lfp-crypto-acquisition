@@ -1,6 +1,22 @@
 {
   "functions": {
-    "api/report.js": { "maxDuration": 30 },
-    "api/freeze.js": { "maxDuration": 30 }
-  }
+    "api/report.js": {
+      "maxDuration": 30
+    },
+    "api/freeze.js": {
+      "maxDuration": 30
+    }
+  },
+  "redirects": [
+    {
+      "source": "/acquisition",
+      "destination": "/acquisition/",
+      "permanent": false
+    },
+    {
+      "source": "/live",
+      "destination": "/live/",
+      "permanent": false
+    }
+  ]
 }

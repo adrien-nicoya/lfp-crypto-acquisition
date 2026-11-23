@@ -15,6 +15,8 @@ Une source du Sheet absente de la liste est comptée en « Autre » avec un aver
 Si le dashboard affiche « Aucune conversion … », mettre l'événement Meta listé dans `META_LEAD_ACTION`.
 Logo chargé depuis decouvrir.cryptos-exponentielles.com (repli texte s'il est indisponible).
 
+Pages : `/` accueil · `/acquisition/` dashboard acquisition · `/live/` analyse des lives.
+
 ## Analyse des lives (`/live/`)
 Page statique générée par `tools/live-report/` (un onglet par soirée). Déposer dans ce dossier l'export YouTube
 (`liveViewership_*.csv`), l'export Calendly (`event-data-*.csv`) et les commentaires (`comments.txt`), puis :

@@ -1,7 +1,7 @@
-// Navigation commune du dashboard (Acquisition / Analyse des lives), injectée en haut de chaque page.
+// Navigation commune du dashboard (Accueil / Acquisition / Analyse des lives), injectée en haut de chaque page.
 (function () {
   if (window.self !== window.top || document.getElementById('lfp-nav')) return;
-  var links = [['/', 'Acquisition'], ['/live/', 'Analyse des lives']];
+  var links = [['/', 'Accueil'], ['/acquisition/', 'Acquisition'], ['/live/', 'Analyse des lives']];
   var p = location.pathname;
   var on = function (h) { return h === '/' ? (p === '/' || p === '/index.html') : p.indexOf(h) === 0; };
   var css = document.createElement('style');

@@ -29,9 +29,9 @@ active = [r for r in cal if r['Canceled'] == 'false']
 first = {}
 for r in sorted(active, key=lambda r: r['Event Created Date & Time']):
     first.setdefault(em(r), r)
-rdv = list(first.values())
+rdv = active  # réservations actives, non dédoublonnées
 RDV = len(rdv)
-dups = len(active) - RDV
+UNIQ = len(first)
 canceled = [r for r in cal if r['Canceled'] == 'true']
 rebooked = sum(em(r) in first for r in canceled)
 slots = collections.Counter()
@@ -140,12 +140,6 @@ CARDS = [
    "Oui. Pas réussi à virer des sommes sur Kraken Pro.",
    "Nous ne sommes plus maîtres de notre argent"],
   "Reprendre 2 ou 3 de ces verbatims au début du J2 pour relier l'inquiétude exprimée à la solution, puis au CTA."),
- ('son', '🔊', '« On n\'entend pas Arthur »',
-  "Concentré sur les 25 premières minutes : le micro d'Arthur est beaucoup plus faible que celui de Saturnin. Le chat parle de son plutôt que du contenu pendant toute l'introduction.",
-  ["Arthur, pouvez-vous monter votre volume ? Celui de Saturnin est plus audible.",
-   "Vos micros ne sont pas réglés de la même façon : quand Saturnin parle, on vous entend presque pas et inversement.",
-   "Le son… sinon on s'en va"],
-  "Équiper Arthur d'un micro-cravate ou d'un casque comme Saturnin et faire un test de niveaux à 19h45."),
  ('fiscal', '🧾', '« Et les impôts ? Les stablecoins vont être taxés ? »',
   "Pic à 21h02-21h17 pendant la séquence fiscalité : flat tax citée à 31,4 %, imposition à la conversion en euros, projet de taxe sur les échanges cryptos/stablecoins en 2027. Revient en fin de live.",
   ["Le futur budget de l'État prévoit de taxer les virements vers les stablecoins à 30 %, sauf si vous avez des astuces",
@@ -153,14 +147,14 @@ CARDS = [
    "Est-ce qu'on doit déclarer aux impôts tant qu'on ne passe pas l'argent sur le compte bancaire ?",
    "Parlerez-vous dans les deux prochains jours de la fiscalité de manière plus approfondie ?"],
   "Prévoir une FAQ fiscalité courte (3 règles + le projet 2027) au J2 ou J3, et l'annoncer dès ce soir pour retenir l'audience."),
-]
-EXTRA = [
  ('lighter', '💎', '« Lighter : quel ticker, sur quelle plateforme ? »',
   "33 messages en 15 minutes après la pépite. Confusion de ticker (LIT = Litentry sur Kraken, Lighter = LIGHTER), question de la dilution de décembre, et dossier promis pas encore reçu.",
   ["Sur Kraken LIT = Litentry ! et Lighter = LIGHTER",
    "Possible d'avoir le dossier d'étude de LIGHTER ?",
    "Y a-t-il une dilution de LIT en décembre ?"],
   "Afficher le nom exact par plateforme sur la slide de la pépite et envoyer le dossier dans le mail du soir, avant la fin du live."),
+]
+EXTRA = [
  ('duree', '⏱️', '« C\'est trop long, il y aura un replay ? »',
   "Live de 4h29. Les demandes de replay arrivent dès les 20 premières minutes ; les départs pour « lever tôt » et les demandes de finir plus tôt se concentrent entre 23h30 et minuit.",
   ["Très bonne soirée, mais merci de finir plus tôt demain et mardi soir",
@@ -185,6 +179,12 @@ EXTRA = [
    "Si on est déjà sur Crypto IA, y a-t-il un tarif préférentiel ?",
    "Club Privé Crypto existera toujours ?"],
   "Préparer une réponse type « je suis déjà membre » à épingler par la modération pendant le CTA."),
+ ('pertes', '📉', "« J'ai perdu de l'argent, je veux me refaire »",
+  "Dès la question sur le portefeuille (20h13-20h17), de nombreux prospects décrivent des pertes de 30 à 90 % (Pump, Solana, Bitcoin acheté au plus haut). Le thème revient vers 22h, juste avant le CTA. C'est aussi la 2e réponse du formulaire Calendly (26 %).",
+  ["Retraité, investi à hauteur de 15 000 € avec 90 % de perte. Je n'y comprends rien.",
+   "J'ai investi du bitcoin en 2022 et j'ai perdu depuis 60 % !",
+   "Oui absolument, je veux récupérer surtout mes pertes"],
+  "Prévoir au J2 un témoignage d'un membre parti en perte qui a remonté son portefeuille, pour traiter ce frein avant le CTA."),
  ('securite', '🔐', '« Et si la plateforme se fait pirater ? »',
   "Hacks d'exchanges (Binance, Coinbase), Ledger, ordinateur quantique : la question de la garde des cryptos revient surtout entre 21h17 et 21h47.",
   ["Quid en cas de piratage des bases de données crypto ?",
@@ -192,6 +192,9 @@ EXTRA = [
    "Vous conseillez une plateforme ou une clé Ledger ?"],
   "Ajouter une minute sur la sécurité (plateforme régulée + clé matérielle pour le long terme) au moment du choix de plateforme."),
 ]
+
+# messages couverts par les cartes affichées
+clustered = len({tuple(x) for c in CARDS + EXTRA for x in cl[c[0]]})
 
 def card(c):
     key, ico, title, desc, samples, reco = c
@@ -217,11 +220,9 @@ panel_j1 = f'''<section class="tab-panel active" id="panel-j1" role="tabpanel">
       {kpi('Inscrits challenge', n(INSCRITS), 'total provisoire', ' <span class="flag">provisoire</span>')}
       {kpi('Pic spectateurs', n(peak), f'à {clock(peak_sec)}')}
       {kpi('Taux conversion inscrits → pic', pct(conv), f'{n(peak)} au pic pour {n(INSCRITS)} inscrits')}
-      {kpi('RDV J1 soir', n(RDV), f'premier RDV à {first_rdv} · {dups} doublons exclus')}
+      {kpi('RDV J1 soir', n(RDV), f'{n(UNIQ)} personnes uniques · premier RDV à {first_rdv}')}
       {kpi('Taux RDV / inscrits', pct(RDV / INSCRITS), f'{pct(RDV / peak)} du pic spectateurs')}
-      {kpi('Messages chat', n(msgs_total), f'{n(len(prospects))} hors modération · {n(reactions)} réactions')}
     </div>
-    <p class="note">Sur le J1, « RDV J1 soir » couvre tout le premier jour : aucun RDV n'existe avant le lien de réservation (22h37). {len(canceled)} réservations annulées, dont {rebooked} reprogrammées par le prospect.</p>
   </div>
 
   <div class="section">
@@ -234,7 +235,7 @@ panel_j1 = f'''<section class="tab-panel active" id="panel-j1" role="tabpanel">
     <h2>Prises de RDV par tranche de 15 minutes</h2>
     <p class="lede">Aucun RDV avant le lien de réservation. {n(slots['22h30'] + slots['22h45'] + slots['23h00'])} RDV sur {n(RDV)} ({pct((slots['22h30'] + slots['22h45'] + slots['23h00']) / RDV, 0)}) sont pris dans les 45 premières minutes qui suivent, puis le rythme retombe à une dizaine par quart d'heure.</p>
     {bars_svg()}
-    <p class="note right">{n(RDV)} RDV uniques (hors {dups} doublons) · heure de création dans Calendly (heure de Paris)</p>
+    <p class="note right">{n(RDV)} réservations actives ({n(UNIQ)} personnes uniques) · heure de création dans Calendly (heure de Paris)</p>
   </div>
 
   <div class="section">
@@ -266,5 +267,5 @@ panels = panel_j1 + pending('J2', 'lundi 23 novembre') + pending('J3', 'mardi 24
 
 page = open(f'{D}/template.html', encoding='utf-8').read().replace('{{TABS}}', tabs).replace('{{PANELS}}', panels)
 open(OUT, 'w', encoding='utf-8').write(page)
-print('peak', peak, clock(peak_sec), 'duration', duration, 'RDV', RDV, 'dups', dups, 'canceled', len(canceled), 'rebooked', rebooked,
+print('peak', peak, clock(peak_sec), 'duration', duration, 'RDV', RDV, 'uniq', UNIQ, 'canceled', len(canceled), 'rebooked', rebooked,
       'msgs', msgs_total, 'prospects', len(prospects), 'clustered', clustered, 'slots', dict(slots), 'sit', dict(sit))
