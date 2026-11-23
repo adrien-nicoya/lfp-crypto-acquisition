@@ -20,4 +20,6 @@ Pages : `/` accueil · `/acquisition/` dashboard acquisition · `/live/` analyse
 ## Analyse des lives (`/live/`)
 Page statique générée par `tools/live-report/` (un onglet par soirée). Déposer dans ce dossier l'export YouTube
 (`liveViewership_*.csv`), l'export Calendly (`event-data-*.csv`) et les commentaires (`comments.txt`), puis :
-`python3 clusters.py && python3 build.py ../../live/index.html`. Les données brutes ne sont pas versionnées.
+`python3 clusters.py && python3 build.py ../../live/index.html` (J1). Jours suivants : un dossier par jour avec un `day.json`
+(jour, date, heure de début, inscrits, valeurs J1), puis `python3 build_day.py ../../live/index.html <dossier jour> <dossier J1>`.
+Les données brutes ne sont pas versionnées.
