@@ -3,7 +3,7 @@ import csv, glob, json, collections, html, sys, os
 
 D = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1]
-INSCRITS = 5135
+INSCRITS = 5662
 START_MIN = 20 * 60 + 2  # début du direct : 20h02 (heure de Paris)
 NB = ' '
 
@@ -211,12 +211,12 @@ def kpi(label, value, meta='', flag=''):
 
 conv = peak / INSCRITS
 panel_j1 = f'''<section class="tab-panel active" id="panel-j1" role="tabpanel">
-  <div class="banner warn"><strong>Chiffres provisoires.</strong> Inscrits fixés à {n(INSCRITS)} en attendant le total définitif. RDV : export Calendly des réservations créées le 22/11 jusqu'à 23h59 ; celles prises après minuit n'y figurent pas.</div>
+  <div class="banner warn"><strong>RDV :</strong> export Calendly des réservations créées le 22/11 jusqu'à 23h59 ; celles prises après minuit n'y figurent pas.</div>
 
   <div class="section">
     <h2>Indicateurs clés</h2>
     <div class="kpi-row">
-      {kpi('Inscrits challenge', n(INSCRITS), 'total provisoire', ' <span class="flag">provisoire</span>')}
+      {kpi('Inscrits challenge', n(INSCRITS), 'total définitif')}
       {kpi('Pic spectateurs', n(peak), f'à {clock(peak_sec)}')}
       {kpi('Taux conversion inscrits → pic', pct(conv), f'{n(peak)} au pic pour {n(INSCRITS)} inscrits')}
       {kpi('RDV J1 soir', n(RDV), f'{n(UNIQ)} personnes uniques · premier RDV à {first_rdv}')}
