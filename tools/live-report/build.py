@@ -29,7 +29,7 @@ active = [r for r in cal if r['Canceled'] == 'false']
 first = {}
 for r in sorted(active, key=lambda r: r['Event Created Date & Time']):
     first.setdefault(em(r), r)
-rdv = active  # réservations actives, non dédoublonnées
+rdv = cal  # toutes les réservations, doublons et annulations compris
 RDV = len(rdv)
 UNIQ = len(first)
 canceled = [r for r in cal if r['Canceled'] == 'true']
@@ -219,7 +219,7 @@ panel_j1 = f'''<section class="tab-panel active" id="panel-j1" role="tabpanel">
       {kpi('Inscrits challenge', n(INSCRITS), 'total définitif')}
       {kpi('Pic spectateurs', n(peak), f'à {clock(peak_sec)}')}
       {kpi('Taux conversion inscrits → pic', pct(conv), f'{n(peak)} au pic pour {n(INSCRITS)} inscrits')}
-      {kpi('RDV J1 soir', n(RDV), f'{n(UNIQ)} personnes uniques · premier RDV à {first_rdv}')}
+      {kpi('RDV J1 soir', n(RDV), f'premier RDV à {first_rdv}')}
       {kpi('Taux RDV / inscrits', pct(RDV / INSCRITS), f'{pct(RDV / peak)} du pic spectateurs')}
     </div>
   </div>
@@ -234,7 +234,7 @@ panel_j1 = f'''<section class="tab-panel active" id="panel-j1" role="tabpanel">
     <h2>Prises de RDV par tranche de 15 minutes</h2>
     <p class="lede">Aucun RDV avant le lien de réservation. {n(slots['22h30'] + slots['22h45'] + slots['23h00'])} RDV sur {n(RDV)} ({pct((slots['22h30'] + slots['22h45'] + slots['23h00']) / RDV, 0)}) sont pris dans les 45 premières minutes qui suivent, puis le rythme retombe à une dizaine par quart d'heure.</p>
     {bars_svg()}
-    <p class="note right">{n(RDV)} réservations actives ({n(UNIQ)} personnes uniques) · heure de création dans Calendly (heure de Paris)</p>
+    <p class="note right">Toutes les réservations Calendly, doublons et annulations compris · heure de création (heure de Paris)</p>
   </div>
 
   <div class="section">

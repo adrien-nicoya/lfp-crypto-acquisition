@@ -43,7 +43,7 @@ duration = curve[-1][0]
 
 # ---------- Calendly (réservations actives, non dédoublonnées) ----------
 cal = list(csv.DictReader(open(glob.glob(f'{DDIR}/event-data*')[0], encoding='utf-8-sig')))
-active = [r for r in cal if r['Canceled'] == 'false']
+active = cal  # toutes les réservations, doublons et annulations compris
 ts = lambda r: r['Event Created Date & Time']
 soir = [r for r in active if ts(r)[:10] == DATE and ts(r)[11:13] >= '20']
 journee = [r for r in active if ts(r)[:10] == DATE and ts(r)[11:13] < '20']
@@ -155,9 +155,9 @@ panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpa
     <div class="kpi-row">
       {kpi('Inscrits challenge', n(INSCRITS), 'total définitif')}
       {kpi('Pic spectateurs', n(peak), f'à {peak_clock} · rétention {pct(ret)} du pic J1', delta_ratio(peak, J1['peak']))}
-      {kpi(f'RDV {J} soir', n(len(soir)), f'{n(uniq(soir))} personnes uniques · 20h-23h59', delta_ratio(len(soir), J1['rdv']))}
+      {kpi(f'RDV {J} soir', n(len(soir)), 'entre 20h et 23h59', delta_ratio(len(soir), J1['rdv']))}
       {kpi(f'RDV {J} journée', n(len(journee)), f'entre minuit et 20h · total du jour {n(len(soir) + len(journee))}')}
-      {kpi('Cumul challenge', n(len(cumul)), f'RDV actifs pris depuis le J1 · {n(uniq(cumul))} personnes')}
+      {kpi('Cumul challenge', n(len(cumul)), 'tous les RDV pris depuis le J1')}
       {kpi('Taux RDV soir / pic', pct(tx), f'{n(len(soir))} RDV pour {n(peak)} au pic', delta_pt(tx, J1['rdv'] / J1['peak']))}
     </div>
   </div>
@@ -172,7 +172,7 @@ panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpa
     <h2>Prises de RDV par tranche de 15 minutes <span class="h2-sub">({J} soir vs J1 soir)</span></h2>
     <p class="lede">Deux vagues ce soir : {n(early)} RDV entre 20h et 21h, en début de live, puis {n(late)} après 22h au moment de l'appel à l'action. Au J1, tous les RDV étaient arrivés après le lien de 22h37.</p>
     {bars_svg()}
-    <p class="note right">Réservations actives non dédoublonnées, par heure de création dans Calendly (heure de Paris). J1 : valeurs du rapport J1.</p>
+    <p class="note right">Toutes les réservations Calendly, doublons et annulations compris, par heure de création (heure de Paris). J1 : valeurs du rapport J1.</p>
   </div>
 
   <div class="section">
