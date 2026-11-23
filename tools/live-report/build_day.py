@@ -155,7 +155,7 @@ panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpa
     <div class="kpi-row">
       {kpi('Pic spectateurs', n(peak), f'à {peak_clock}<br>rétention {pct(ret)} du pic J1', delta_ratio(peak, J1['peak']))}
       {kpi(f'RDV {J} soir', n(len(soir)), 'entre 20h et 23h59', delta_ratio(len(soir), J1['rdv']))}
-      {kpi(f'RDV {J} journée', n(len(journee)), f'entre minuit et 20h · total du jour {n(len(soir) + len(journee))}')}
+      {kpi(f'RDV {J} journée', n(len(journee)), f'entre minuit et 20h<br>total du jour {n(len(soir) + len(journee))}')}
       {kpi('Cumul challenge', n(len(cumul)), 'tous les RDV pris depuis le J1')}
       {kpi('Taux RDV soir / pic', pct(tx), f'{n(len(soir))} RDV pour {n(peak)} au pic', delta_pt(tx, J1['rdv'] / J1['peak']))}
       {kpi('Taux RDV / inscrits', pct(len(cumul) / INSCRITS), f'{n(len(cumul))} RDV au total pour {n(INSCRITS)} inscrits')}
