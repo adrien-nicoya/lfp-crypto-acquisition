@@ -3,7 +3,7 @@ import csv, glob, json, collections, html, sys, os
 
 D = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1]
-INSCRITS = 5662
+INSCRITS = 5866
 START_MIN = 20 * 60 + 2  # début du direct : 20h02 (heure de Paris)
 NB = ' '
 
