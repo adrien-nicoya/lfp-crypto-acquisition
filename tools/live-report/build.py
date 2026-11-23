@@ -212,7 +212,6 @@ def kpi(label, value, meta='', flag=''):
 conv = peak / INSCRITS
 panel_j1 = f'''<section class="tab-panel active" id="panel-j1" role="tabpanel">
   <div class="banner warn"><strong>Chiffres provisoires.</strong> Inscrits fixés à {n(INSCRITS)} en attendant le total définitif. RDV : export Calendly des réservations créées le 22/11 jusqu'à 23h59 ; celles prises après minuit n'y figurent pas.</div>
-  <div class="banner info"><strong>Pas de comparaison :</strong> premier challenge crypto, aucun J1 équivalent disponible.</div>
 
   <div class="section">
     <h2>Indicateurs clés</h2>
