@@ -158,8 +158,13 @@ early = sum(v for k, v in slots.items() if k < '21h00')
 late = sum(v for k, v in slots.items() if k >= '22h00')
 end_min = START_MIN + duration // 60
 
+def count_between(a, b):
+    return sum(a <= ts(r)[11:16] <= b for r in soir)
+bars_lede = cfg['bars_lede'].format(**{k: n(count_between(*v)) for k, v in cfg.get('bars_counts', {}).items()}) if cfg.get('bars_lede') else \
+    f"Deux vagues ce soir : {n(early)} RDV entre 20h et 21h, en début de live, puis {n(late)} après 22h au moment de l'appel à l'action."
 has_chat = os.path.exists(os.path.join(DDIR, 'cards.json'))
-banner = '' if has_chat else f'  <div class="banner warn"><strong>Analyse du chat à venir :</strong> l\'export des commentaires du {J} n\'est pas encore disponible. Heure de début du direct estimée à {hm(START_MIN)}, à confirmer avec le chat.</div>'
+notes = ([] if has_chat else [f"<strong>Analyse du chat à venir :</strong> l'export des commentaires du {J} n'est pas encore disponible. Heure de début du direct estimée à {hm(START_MIN)}, à confirmer avec le chat."]) + cfg.get('notes', [])
+banner = ''.join(f'  <div class="banner warn">{x}</div>' for x in notes)
 panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpanel">
 {banner}
 
@@ -184,7 +189,7 @@ panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpa
 
   <div class="section">
     <h2>Prises de RDV par tranche de 15 minutes <span class="h2-sub">({J} soir)</span></h2>
-    <p class="lede">Deux vagues ce soir : {n(early)} RDV entre 20h et 21h, en début de live, puis {n(late)} après 22h au moment de l'appel à l'action.</p>
+    <p class="lede">{bars_lede}</p>
     {bars_svg()}
     <p class="note right">Toutes les réservations Calendly, doublons et annulations compris, par heure de création (heure de Paris).</p>
   </div>
