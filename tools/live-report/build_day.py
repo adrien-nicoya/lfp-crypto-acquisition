@@ -203,8 +203,8 @@ s = re.sub(r'<section class="tab-panel active" id="panel-(?!%s)([a-z0-9]+)" role
            r'<section class="tab-panel" id="panel-\1" role="tabpanel" hidden>', s)
 s = re.sub(r'<button class="tab-btn active" type="button" role="tab" data-tab="([a-z0-9]+)" aria-selected="true">',
            r'<button class="tab-btn" type="button" role="tab" data-tab="\1" aria-selected="false">', s)
-s = s.replace(f'<button class="tab-btn is-pending" type="button" role="tab" data-tab="{J.lower()}" aria-selected="false">',
-              f'<button class="tab-btn active" type="button" role="tab" data-tab="{J.lower()}" aria-selected="true">')
+s = re.sub(r'<button class="tab-btn[^"]*" type="button" role="tab" data-tab="%s" aria-selected="(?:true|false)">' % J.lower(),
+           f'<button class="tab-btn active" type="button" role="tab" data-tab="{J.lower()}" aria-selected="true">', s)
 if '.marks{' not in s:
     s = s.replace('.pending{text-align:center', '.marks{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 28px;font-size:13px}\n.marks li{display:flex;gap:8px;align-items:baseline}\n.mk-n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center}\n.mk-t{flex:none;width:42px;font-weight:700}\n.mk-l{color:var(--muted)}\n.mk-l strong{color:var(--ink);font-weight:600}\n@media (max-width:760px){.marks{grid-template-columns:1fr}}\n.pending{text-align:center', 1)
 if '.kpi-delta' not in s:
