@@ -60,8 +60,24 @@ def sit_of(rs):
     return collections.Counter({('Sans réponse' if k.startswith('Où en êtes') else k): v for k, v in c.items()})
 
 # ---------- SVG ----------
+MARKERS = cfg.get('markers', [])
+def mins20(t):
+    h, m = map(int, t.split(':')); return h * 60 + m - 20 * 60
+def marks_svg(X, T, PH):
+    out = []
+    for i, mk in enumerate(MARKERS, 1):
+        x = X(mins20(mk['time']))
+        out.append(f'<line x1="{x:.1f}" y1="{T-8}" x2="{x:.1f}" y2="{T+PH}" stroke="#011c40" stroke-width="1.1" stroke-dasharray="3,4" opacity=".55"/>'
+                   f'<circle cx="{x:.1f}" cy="{T-16}" r="9" fill="#011c40"/><text x="{x:.1f}" y="{T-12}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">{i}</text>')
+    return ''.join(out)
+def marks_legend():
+    if not MARKERS: return ''
+    return '<ol class="marks">' + ''.join(
+        f'<li><span class="mk-n">{i}</span><span class="mk-t">{mk["time"].replace(":", "h")}</span><span class="mk-l"><strong>{esc(mk["label"])}</strong>'
+        + (f' · {esc(mk["note"])}' if mk.get('note') else '') + '</span></li>' for i, mk in enumerate(MARKERS, 1)) + '</ol>'
+
 def retention_svg():
-    W, H, L, R, T, B = 920, 420, 60, 30, 56, 60
+    W, H, L, R, T, B = 920, 440, 60, 30, 76, 60
     PW, PH = W - L - R, H - T - B
     ymax, xmax = 1200, 270
     X = lambda m: L + m / xmax * PW
@@ -87,6 +103,7 @@ def retention_svg():
   <polygon points="{" ".join(area)}" fill="url(#rg{J})"/>
   <polyline points="{" ".join(pts)}" fill="none" stroke="#056cf2" stroke-width="2.4" stroke-linejoin="round"/>
   <circle cx="{X(off1 + p1s/60):.1f}" cy="{Y(p1):.1f}" r="3.5" fill="#9aa9bd" stroke="#fff" stroke-width="1.5"/>
+  {marks_svg(X, T, PH)}
   <circle cx="{px:.1f}" cy="{py:.1f}" r="4.5" fill="#056cf2" stroke="#fff" stroke-width="2"/>
   <text x="{px:.1f}" y="{py-10:.1f}" text-anchor="middle" font-size="12" font-weight="700" fill="#011c40">{n(peak)} · {hm(START_MIN + peak_sec // 60)}</text>
   <rect x="{L}" y="8" width="14" height="14" rx="2" fill="#056cf2"/><text x="{L+22}" y="20" font-size="13" font-weight="600" fill="#011c40">{J} ({LABEL}) · pic {n(peak)}</text>
@@ -167,6 +184,7 @@ panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpa
   <div class="section">
     <h2>Courbe de rétention : spectateurs simultanés <span class="h2-sub">({J} vs J1)</span></h2>
     {retention_svg()}
+    {marks_legend()}
     <p class="note right">Direct de {hm(START_MIN)} à {hm(end_min)} · durée {duration // 3600}h{duration % 3600 // 60:02d} · pic {n(peak)} ({pct(ret)} du pic J1) · {n(curve[-1][1])} spectateurs à la fin ({pct(curve[-1][1] / peak, 0)} du pic)</p>
   </div>
 
@@ -201,6 +219,8 @@ s = re.sub(r'<button class="tab-btn active" type="button" role="tab" data-tab="(
            r'<button class="tab-btn" type="button" role="tab" data-tab="\1" aria-selected="false">', s)
 s = s.replace(f'<button class="tab-btn is-pending" type="button" role="tab" data-tab="{J.lower()}" aria-selected="false">',
               f'<button class="tab-btn active" type="button" role="tab" data-tab="{J.lower()}" aria-selected="true">')
+if '.marks{' not in s:
+    s = s.replace('.pending{text-align:center', '.marks{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 28px;font-size:13px}\n.marks li{display:flex;gap:8px;align-items:baseline}\n.mk-n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center}\n.mk-t{flex:none;width:42px;font-weight:700}\n.mk-l{color:var(--muted)}\n.mk-l strong{color:var(--ink);font-weight:600}\n@media (max-width:760px){.marks{grid-template-columns:1fr}}\n.pending{text-align:center', 1)
 if '.kpi-delta' not in s:
     s = s.replace('.kpi-meta{font-size:12px;color:var(--muted)}',
                   '.kpi-meta{font-size:12px;color:var(--muted)}\n.kpi-delta{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:700}\n.kpi-delta.pos{color:#16a34a}.kpi-delta.neg{color:#dc2626}.kpi-delta.neu{color:#94a3b8}')
