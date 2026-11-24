@@ -151,7 +151,8 @@ def chat_section():
 
 # ---------- Panel ----------
 peak_clock = hm(START_MIN + peak_sec // 60)
-ret = peak / J1['peak']
+RET = cfg.get('ret_base', {'label': 'J1', 'peak': J1['peak']})  # jour de référence de la rétention
+ret = peak / RET['peak']
 tx = len(soir) / peak
 waves = sorted(slots.items(), key=lambda kv: kv[0])
 early = sum(v for k, v in slots.items() if k < '21h00')
@@ -172,7 +173,7 @@ panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpa
     <h2>Indicateurs clés</h2>
     <div class="kpi-row">
       {kpi('Pic spectateurs', n(peak), f'à {peak_clock}')}
-      {kpi('Rétention de participation', pct(ret), f'{n(peak)} au pic pour {n(J1["peak"])} au J1')}
+      {kpi('Rétention de participation', pct(ret), f'{n(peak)} au pic pour {n(RET["peak"])} au {RET["label"]}')}
       {kpi(f'RDV {J} soir', n(len(soir)), f'{n(len(journee))} sur la journée<br>{n(len(soir) + len(journee))} au total {J}')}
       {kpi('Cumul challenge', n(len(cumul)), 'tous les RDV pris depuis le J1')}
       {kpi('Taux RDV soir / pic', pct(tx), f'{n(len(soir))} RDV pour {n(peak)} au pic')}
