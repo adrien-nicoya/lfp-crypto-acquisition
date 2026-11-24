@@ -147,8 +147,10 @@ early = sum(v for k, v in slots.items() if k < '21h00')
 late = sum(v for k, v in slots.items() if k >= '22h00')
 end_min = START_MIN + duration // 60
 
+has_chat = os.path.exists(os.path.join(DDIR, 'cards.json'))
+banner = '' if has_chat else f'  <div class="banner warn"><strong>Analyse du chat à venir :</strong> l\'export des commentaires du {J} n\'est pas encore disponible. Heure de début du direct estimée à {hm(START_MIN)}, à confirmer avec le chat.</div>'
 panel = f'''<section class="tab-panel active" id="panel-{J.lower()}" role="tabpanel">
-  <div class="banner warn"><strong>Analyse du chat à venir :</strong> l'export des commentaires du {J} n'est pas encore disponible. Heure de début du direct estimée à {hm(START_MIN)}, à confirmer avec le chat.</div>
+{banner}
 
   <div class="section">
     <h2>Indicateurs clés</h2>
